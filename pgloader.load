@@ -1,0 +1,7 @@
+LOAD DATABASE
+     FROM mysql://root:rootpass@127.0.0.1:3307/crm_tmp
+     INTO postgresql://admin:password@127.0.0.1:5433/crm_db
+
+WITH include drop, create tables, create indexes, reset sequences, foreign keys
+
+SET work_mem to '16MB', maintenance_work_mem to '512 MB';

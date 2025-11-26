@@ -1,0 +1,18 @@
+# tmp-mysql.yml
+version: "3.8"
+
+services:
+  tmp-mysql:
+    image: mysql:8.0                # official MySQL 8 image
+    container_name: tmp-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass   # any password you like
+      MYSQL_DATABASE: crm_tmp
+    command: ["--default-authentication-plugin=mysql_native_password"]
+    ports:
+      - "3307:3306"                  # expose on host port 3307 (so it won’t clash with your existing MySQL)
+    volumes:
+      - tmp-mysql-data:/var/lib/mysql
+
+volumes:
+  tmp-mysql-data:

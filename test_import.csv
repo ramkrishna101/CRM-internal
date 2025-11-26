@@ -1,0 +1,3 @@
+external_id,username,email,phone,last_deposit_amount,last_deposit_date
+user123,john_doe,john@example.com,1234567890,100.50,2023-10-27
+user456,jane_smith,jane@example.com,0987654321,50.00,2023-10-26

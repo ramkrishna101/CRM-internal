@@ -1,0 +1,72 @@
+Product Requirements Document (PRD) - Multi-Tenant CRM
+1. Introduction
+This document outlines the requirements for a custom Customer Relationship Management (CRM) system designed for managing customer interactions across multiple websites. The system focuses on role-based access, strict data isolation, performance tracking, and efficient lead management via cold calling and daily data imports.
+
+2. Technology Stack
+Frontend: React
+Backend: Node.js
+Database: PostgreSQL
+Infrastructure: TBD (Likely cloud-based with strict security controls)
+3. User Roles & Hierarchy
+The system supports a strict hierarchy where performance visibility flows upwards.
+
+Admin: Full system access, user management, security controls.
+Manager: Oversees Retention Managers and Agents. Can view total performance of their downline.
+Retention Manager: Manages a team of Agents.
+Agent: Front-line user. Works on one specific website at a time. Strictly isolated from other websites' data.
+Service Role: Automated role for handling data imports.
+Hierarchy Rules:
+
+Agents can report to multiple Managers.
+Managers see total performance of their reporting agents.
+4. Core Features
+4.1. Authentication & Security
+Access Control: Role-Based Access Control (RBAC).
+Session Management: Strong session handling with an "Easy Revoke" feature for Admins to instantly kill sessions.
+IP Whitelisting: Strict login restrictions based on IP addresses.
+Multi-Tenancy: Strict data isolation at the "Website" level. Agents assigned to Website A cannot access Website B data.
+4.2. Data Management
+Daily Imports: Automated service fetches and imports CSV data daily.
+User Mapping:
+New users from CSV -> Created as New User.
+Existing users -> Updated with new deposit data.
+Deposit Logic:
+If Total Deposit < 2 -> Categorized as One Time Deposit User.
+Daily checks for new deposits to update status (e.g., Retained upon redeposit).
+4.3. Cold Calling Module
+Data Dump: Separate repository for "Cold" leads (distinct from active CRM users).
+Claiming System:
+Agents can search/view the dump.
+"Click to Claim": Agents claim users to their bucket.
+Limits: Max 10 claims per day per agent.
+Linking: Agents can link a "Cold" lead to an existing CRM user if a match is found.
+4.4. Agent Workflow
+Dashboard: View assigned users and daily tasks.
+Interaction Tools:
+Comments: Add notes to user profiles.
+Follow-ups: Create reminders for future calls.
+Categorization: Dropdown to tag users (e.g., Potential, High Risk, Other).
+Status Lifecycle:
+New (Imported)
+One Time Deposit (If deposit < 2)
+Claimed (Picked by agent)
+Contacted (Agent logged call/msg)
+Retained (User made a redeposit)
+4.5. Integrations (Placeholder)
+Channels: WhatsApp, Telegram, Calling Tool.
+Status: Providers TBD. Architecture must support pluggable integration modules.
+4.6. Reporting & Performance
+Metrics:
+Number of Calls
+Number of Claims
+Number of Deposits
+Total Value of Deposits
+Conversion Ratio (Claimed vs. Converted)
+Retention %
+Visibility: Hierarchical view. Managers see aggregated stats for their teams.
+5. Non-Functional Requirements
+Scalability: Handle daily imports of 1,000 - 100,000 records.
+Performance: Low latency for agent dashboards and search.
+Security: Audit logs for all data access and changes.
+6. Future Scope
+Specific integration providers (Twilio, etc.) implementation.
