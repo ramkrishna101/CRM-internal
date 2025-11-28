@@ -100,7 +100,7 @@ const CustomerDetailPage = () => {
                         </Box>
                         <Box mt={2}>
                             <Typography variant="subtitle2">Created Date</Typography>
-                            <Typography variant="body1">{customer.createdDate ? new Date(customer.createdDate).toLocaleDateString() : '-'}
+                            <Typography variant="body1">{customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : '-'}
                             </Typography>
                         </Box>
                         <Box mt={2}>
