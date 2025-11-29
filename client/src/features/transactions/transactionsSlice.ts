@@ -60,7 +60,28 @@ export const fetchTransactionOptions = createAsyncThunk(
 
 export const fetchTransactions = createAsyncThunk(
     'transactions/fetchAll',
-    async ({ page, limit, startDate, endDate, website, panel, type }: {
+    async ({ 
+        page, 
+        limit, 
+        startDate, 
+        endDate, 
+        website, 
+        panel, 
+        type,
+        userId,
+        branch,
+        status,
+        lastCallStartDate,
+        lastCallEndDate,
+        lastCallOutcome,
+        lastTransactionStartDate,
+        lastTransactionEndDate,
+        firstTransactionStartDate,
+        firstTransactionEndDate,
+        totalDepositAmountStart,
+        totalDepositAmountEnd,
+        gameInterest
+    }: {
         page: number;
         limit: number;
         startDate?: string;
@@ -68,10 +89,44 @@ export const fetchTransactions = createAsyncThunk(
         website?: string;
         panel?: string;
         type?: string;
+        userId?: string;
+        branch?: string;
+        status?: string;
+        lastCallStartDate?: string;
+        lastCallEndDate?: string;
+        lastCallOutcome?: string;
+        lastTransactionStartDate?: string;
+        lastTransactionEndDate?: string;
+        firstTransactionStartDate?: string;
+        firstTransactionEndDate?: string;
+        totalDepositAmountStart?: number;
+        totalDepositAmountEnd?: number;
+        gameInterest?: string;
     }, { rejectWithValue }) => {
         try {
             const response = await api.get('/transactions', {
-                params: { page, limit, startDate, endDate, website, panel, type },
+                params: { 
+                    page, 
+                    limit, 
+                    startDate, 
+                    endDate, 
+                    website, 
+                    panel, 
+                    type,
+                    userId,
+                    branch,
+                    status,
+                    lastCallStartDate,
+                    lastCallEndDate,
+                    lastCallOutcome,
+                    lastTransactionStartDate,
+                    lastTransactionEndDate,
+                    firstTransactionStartDate,
+                    firstTransactionEndDate,
+                    totalDepositAmountStart,
+                    totalDepositAmountEnd,
+                    gameInterest
+                },
             });
             return response.data;
         } catch (error: any) {

@@ -23,13 +23,14 @@ import { TransactionsModule } from './transactions/transactions.module';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
-      port: 5433,
+      port: 5432,
       username: 'admin',
       password: 'password',
       database: 'crm_db',
       autoLoadEntities: true,
       synchronize: true, // Only for dev
       entities: [User, Website, Customer],
+      logging: true,
     }),
     TypeOrmModule.forFeature([User, Website, Customer]),
     UsersModule,
@@ -46,4 +47,4 @@ import { TransactionsModule } from './transactions/transactions.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

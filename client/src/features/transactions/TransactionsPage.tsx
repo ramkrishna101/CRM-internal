@@ -36,6 +36,20 @@ const TransactionsPage = () => {
   const [website, setWebsite] = useState('');
   const [panel, setPanel] = useState('');
   const [type, setType] = useState('');
+  const [userId, setUserId] = useState('');
+  const [branch, setBranch] = useState('');
+  const [status, setStatus] = useState('');
+  const [lastCallStartDate, setLastCallStartDate] = useState('');
+  const [lastCallEndDate, setLastCallEndDate] = useState('');
+  const [lastCallOutcome, setLastCallOutcome] = useState('');
+  const [lastTransactionStartDate, setLastTransactionStartDate] = useState('');
+  const [lastTransactionEndDate, setLastTransactionEndDate] = useState('');
+  const [firstTransactionStartDate, setFirstTransactionStartDate] =
+    useState('');
+  const [firstTransactionEndDate, setFirstTransactionEndDate] = useState('');
+  const [totalDepositAmountStart, setTotalDepositAmountStart] = useState('');
+  const [totalDepositAmountEnd, setTotalDepositAmountEnd] = useState('');
+  const [gameInterest, setGameInterest] = useState('');
 
   useEffect(() => {
     dispatch(fetchTransactionOptions(undefined));
@@ -55,10 +69,49 @@ const TransactionsPage = () => {
         endDate,
         website,
         panel,
-        type
+        type,
+        userId,
+        branch,
+        status,
+        lastCallStartDate,
+        lastCallEndDate,
+        lastCallOutcome,
+        lastTransactionStartDate,
+        lastTransactionEndDate,
+        firstTransactionStartDate,
+        firstTransactionEndDate,
+        totalDepositAmountStart: totalDepositAmountStart
+          ? parseFloat(totalDepositAmountStart)
+          : undefined,
+        totalDepositAmountEnd: totalDepositAmountEnd
+          ? parseFloat(totalDepositAmountEnd)
+          : undefined,
+        gameInterest
       })
     );
-  }, [dispatch, page, limit, startDate, endDate, website, panel, type]);
+  }, [
+    dispatch,
+    page,
+    limit,
+    startDate,
+    endDate,
+    website,
+    panel,
+    type,
+    userId,
+    branch,
+    status,
+    lastCallStartDate,
+    lastCallEndDate,
+    lastCallOutcome,
+    lastTransactionStartDate,
+    lastTransactionEndDate,
+    firstTransactionStartDate,
+    firstTransactionEndDate,
+    totalDepositAmountStart,
+    totalDepositAmountEnd,
+    gameInterest
+  ]);
 
   const handleChangePage = (_: unknown, newPage: number) => {
     dispatch(setPage(newPage + 1));
@@ -76,8 +129,9 @@ const TransactionsPage = () => {
         Transactions
       </Typography>
 
-      <Paper sx={{ p: 2, mb: 2 }}>
+      <Paper sx={{ p: 2, mb: 2, maxHeight: 400, overflowY: 'auto' }}>
         <Grid container spacing={2}>
+          {/* Transaction Date Range */}
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <TextField
               label="Start Date"
@@ -100,6 +154,8 @@ const TransactionsPage = () => {
               size="small"
             />
           </Grid>
+
+          {/* Website */}
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <TextField
               select
@@ -120,6 +176,8 @@ const TransactionsPage = () => {
               ))}
             </TextField>
           </Grid>
+
+          {/* Panel */}
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <TextField
               select
@@ -137,6 +195,8 @@ const TransactionsPage = () => {
               ))}
             </TextField>
           </Grid>
+
+          {/* Type */}
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <TextField
               select
@@ -149,6 +209,182 @@ const TransactionsPage = () => {
               <MenuItem value="">All</MenuItem>
               <MenuItem value="DEPOSIT">Deposit</MenuItem>
               <MenuItem value="WITHDRAW">Withdrawal</MenuItem>
+            </TextField>
+          </Grid>
+
+          {/* User ID */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              label="User ID"
+              fullWidth
+              value={userId}
+              onChange={e => setUserId(e.target.value)}
+              size="small"
+              placeholder="Search by user ID"
+            />
+          </Grid>
+
+          {/* Branch */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              label="Branch"
+              fullWidth
+              value={branch}
+              onChange={e => setBranch(e.target.value)}
+              size="small"
+              placeholder="Enter branch"
+            />
+          </Grid>
+
+          {/* Status */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              select
+              label="Status"
+              fullWidth
+              value={status}
+              onChange={e => setStatus(e.target.value)}
+              size="small"
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="active">Active</MenuItem>
+              <MenuItem value="inactive">Inactive</MenuItem>
+              <MenuItem value="sleeping">Sleeping</MenuItem>
+            </TextField>
+          </Grid>
+
+          {/* Last Call Date Range */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              label="Last Call Start Date"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={lastCallStartDate}
+              onChange={e => setLastCallStartDate(e.target.value)}
+              size="small"
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              label="Last Call End Date"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={lastCallEndDate}
+              onChange={e => setLastCallEndDate(e.target.value)}
+              size="small"
+            />
+          </Grid>
+
+          {/* Last Call Outcome */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              select
+              label="Last Call Outcome"
+              fullWidth
+              value={lastCallOutcome}
+              onChange={e => setLastCallOutcome(e.target.value)}
+              size="small"
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="ringing">Ringing</MenuItem>
+              <MenuItem value="didn't pick">Didn't Pick</MenuItem>
+              <MenuItem value="interested">Interested</MenuItem>
+              <MenuItem value="not interested">Not Interested</MenuItem>
+              <MenuItem value="callback">Callback</MenuItem>
+              <MenuItem value="wrong number">Wrong Number</MenuItem>
+              <MenuItem value="busy">Busy</MenuItem>
+            </TextField>
+          </Grid>
+
+          {/* Last Transaction Date Range */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              label="Last Transaction Start"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={lastTransactionStartDate}
+              onChange={e => setLastTransactionStartDate(e.target.value)}
+              size="small"
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              label="Last Transaction End"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={lastTransactionEndDate}
+              onChange={e => setLastTransactionEndDate(e.target.value)}
+              size="small"
+            />
+          </Grid>
+
+          {/* First Transaction Date Range */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              label="First Transaction Start"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={firstTransactionStartDate}
+              onChange={e => setFirstTransactionStartDate(e.target.value)}
+              size="small"
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              label="First Transaction End"
+              type="date"
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              value={firstTransactionEndDate}
+              onChange={e => setFirstTransactionEndDate(e.target.value)}
+              size="small"
+            />
+          </Grid>
+
+          {/* Total Deposit Amount Range */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              label="Min Deposit Amount"
+              type="number"
+              fullWidth
+              value={totalDepositAmountStart}
+              onChange={e => setTotalDepositAmountStart(e.target.value)}
+              size="small"
+              placeholder="Min amount"
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              label="Max Deposit Amount"
+              type="number"
+              fullWidth
+              value={totalDepositAmountEnd}
+              onChange={e => setTotalDepositAmountEnd(e.target.value)}
+              size="small"
+              placeholder="Max amount"
+            />
+          </Grid>
+
+          {/* Game Interest */}
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+            <TextField
+              select
+              label="Game Interest"
+              fullWidth
+              value={gameInterest}
+              onChange={e => setGameInterest(e.target.value)}
+              size="small"
+            >
+              <MenuItem value="">All</MenuItem>
+              <MenuItem value="SPORTS">Sports</MenuItem>
+              <MenuItem value="LIVE">Live</MenuItem>
+              <MenuItem value="BOTH">Both</MenuItem>
+              <MenuItem value="CASINO">Casino</MenuItem>
             </TextField>
           </Grid>
         </Grid>
