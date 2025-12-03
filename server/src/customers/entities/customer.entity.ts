@@ -12,6 +12,7 @@ import {
 import { Interaction } from '../../interactions/entities/interaction.entity';
 import { Website } from '../../websites/entities/website.entity';
 import { User } from '../../users/entities/user.entity';
+import { Tag } from './tags.entity';
 
 export enum CustomerStatus {
   NEW = 'new',
@@ -40,6 +41,9 @@ export class Customer {
 
   @Column({ nullable: true })
   username: string;
+
+  @Column({ nullable: true, name: 'tag_id' })
+  tagId: string | null;
 
   @Column({ nullable: true })
   email: string;
@@ -131,4 +135,8 @@ export class Customer {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @ManyToOne(() => Tag, { nullable: true })
+  @JoinColumn({ name: 'tag_id' })
+  tag: Tag;
 }

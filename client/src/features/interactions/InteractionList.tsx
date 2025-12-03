@@ -16,6 +16,8 @@ import {
     Phone as PhoneIcon,
     MeetingRoom as MeetingIcon,
     Email as EmailIcon,
+    WhatsApp as WhatsAppIcon,
+    Telegram as TelegramIcon,
     QuestionMark as OtherIcon,
 } from '@mui/icons-material';
 import { fetchInteractions } from './interactionsSlice';
@@ -40,6 +42,8 @@ const InteractionList = ({ customerId }: InteractionListProps) => {
             case 'call': return <PhoneIcon />;
             case 'meeting': return <MeetingIcon />;
             case 'email': return <EmailIcon />;
+            case 'whatsapp': return <WhatsAppIcon />;
+            case 'telegram': return <TelegramIcon />;
             case 'note': return <NoteIcon />;
             default: return <OtherIcon />;
         }

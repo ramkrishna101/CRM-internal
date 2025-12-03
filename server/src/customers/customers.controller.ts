@@ -21,6 +21,11 @@ export class CustomersController {
     return this.customersService.create(createCustomerDto);
   }
 
+  @Get('tags')
+  getTags() {
+    return this.customersService.getTags();
+  }
+
   @Get('options')
   getOptions(@Query('website') website?: string) {
     return this.customersService.getOptions(website);

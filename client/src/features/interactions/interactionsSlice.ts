@@ -5,7 +5,7 @@ export interface Interaction {
     id: string;
     customerId: string;
     agentId: string;
-    type: 'note' | 'call' | 'meeting' | 'email' | 'other';
+    type: 'note' | 'call' | 'meeting' | 'email' | 'whatsapp' | 'telegram' | 'other';
     content: string;
     createdAt: string;
     agent?: {
@@ -47,7 +47,20 @@ export const createInteraction = createAsyncThunk(
             const response = await api.post('/interactions', data);
             return response.data;
         } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || 'Failed to create interaction');
+            const resp = error?.response?.data;
+            let message = 'Failed to create interaction';
+            if (resp) {
+                if (typeof resp?.message === 'string') {
+                    message = resp.message;
+                } else if (Array.isArray(resp?.message)) {
+                    message = resp.message.join(', ');
+                } else if (typeof resp === 'string') {
+                    message = resp;
+                } else if (resp?.error) {
+                    message = resp.error;
+                }
+            }
+            return rejectWithValue(message);
         }
     }
 );

@@ -12,10 +12,14 @@ export class InteractionsService {
     private interactionsRepository: Repository<Interaction>,
   ) {}
 
-  create(createInteractionDto: CreateInteractionDto) {
+  async create(createInteractionDto: CreateInteractionDto) {
     const interaction =
       this.interactionsRepository.create(createInteractionDto);
-    return this.interactionsRepository.save(interaction);
+    const saved = await this.interactionsRepository.save(interaction);
+    return this.interactionsRepository.findOne({
+      where: { id: saved.id },
+      relations: ['agent'],
+    });
   }
 
   findAllByCustomer(customerId: string) {
@@ -27,18 +31,26 @@ export class InteractionsService {
   }
 
   findAll() {
-    return `This action returns all interactions`;
+    return this.interactionsRepository.find({
+      order: { createdAt: 'DESC' },
+      relations: ['agent'],
+    });
   }
 
   findOne(id: string) {
-    return `This action returns a #${id} interaction`;
+    return this.interactionsRepository.findOne({
+      where: { id },
+      relations: ['agent'],
+    });
   }
 
-  update(id: string, updateInteractionDto: UpdateInteractionDto) {
-    return `This action updates a #${id} interaction`;
+  async update(id: string, updateInteractionDto: UpdateInteractionDto) {
+    await this.interactionsRepository.update(id, updateInteractionDto);
+    return this.findOne(id);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} interaction`;
+  async remove(id: string) {
+    await this.interactionsRepository.delete(id);
+    return { id };
   }
 }

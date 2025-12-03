@@ -8,6 +8,7 @@ import {
     Paper,
     Typography,
     CircularProgress,
+    Alert,
 } from '@mui/material';
 import { createInteraction } from './interactionsSlice';
 import type { AppDispatch, RootState } from '../../store/store';
@@ -18,7 +19,7 @@ interface InteractionFormProps {
 
 const InteractionForm = ({ customerId }: InteractionFormProps) => {
     const dispatch = useDispatch<AppDispatch>();
-    const { createLoading } = useSelector((state: RootState) => state.interactions);
+    const { createLoading, error } = useSelector((state: RootState) => state.interactions);
     const { user } = useSelector((state: RootState) => state.auth);
 
     const [type, setType] = useState('note');
@@ -60,6 +61,8 @@ const InteractionForm = ({ customerId }: InteractionFormProps) => {
                     <MenuItem value="call">Call</MenuItem>
                     <MenuItem value="meeting">Meeting</MenuItem>
                     <MenuItem value="email">Email</MenuItem>
+                    <MenuItem value="whatsapp">WhatsApp</MenuItem>
+                    <MenuItem value="telegram">Telegram</MenuItem>
                     <MenuItem value="other">Other</MenuItem>
                 </TextField>
                 <TextField
@@ -80,6 +83,11 @@ const InteractionForm = ({ customerId }: InteractionFormProps) => {
                 >
                     {createLoading ? <CircularProgress size={24} /> : 'Log Interaction'}
                 </Button>
+                {error && (
+                    <Box mt={2}>
+                        <Alert severity="error">{error}</Alert>
+                    </Box>
+                )}
             </Box>
         </Paper>
     );

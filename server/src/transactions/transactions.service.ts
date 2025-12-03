@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transaction } from './entities/transaction.entity';
+import { Website } from '../websites/entities/website.entity';
+import { Customer } from '../customers/entities/customer.entity';
+import { Tag } from '../customers/entities/tags.entity';
 
 @Injectable()
 export class TransactionsService {
@@ -91,6 +94,21 @@ export class TransactionsService {
     // Base query builder function to ensure consistency between count and data queries
     const createBaseQuery = () => {
       const qb = this.transactionsRepository.createQueryBuilder('transaction');
+
+      // Join websites by matching on URL or name (transactions store the website as a string)
+      qb.leftJoin(
+        Website,
+        'website_entity',
+        'LOWER(website_entity.url) = LOWER(transaction.website) OR LOWER(website_entity.name) = LOWER(transaction.website)',
+      );
+
+      // Join customers by matching externalId and websiteId
+      qb.leftJoin(
+        Customer,
+        'customer',
+        'customer.externalId = transaction.client AND customer.websiteId = website_entity.id',
+      ).andWhere('customer.id IS NOT NULL');
+
       if (search) {
         qb.andWhere(
           '(transaction.client ILIKE :search OR transaction.branch ILIKE :search OR transaction.website ILIKE :search)',
@@ -141,11 +159,13 @@ export class TransactionsService {
     );
 
     const countResult = await countQuery.getRawOne();
+
     const total = parseInt(countResult?.count || '0', 10);
 
     // Get paginated results
     const query = createBaseQuery()
       .select('transaction.client', 'client')
+      .addSelect('customer.id', 'customerId')
       .addSelect('MIN(transaction.branch)', 'branch')
       .addSelect('MIN(transaction.panel)', 'panel')
       .addSelect('MIN(transaction.website)', 'website')
@@ -162,7 +182,8 @@ export class TransactionsService {
         "MAX(CASE WHEN transaction.type = 'DEPOSIT' THEN transaction.date END)::timestamp",
         'lastDepositDate',
       )
-      .groupBy('transaction.client');
+      .groupBy('transaction.client')
+      .addGroupBy('customer.id');
 
     if (lastDepositDate) {
       query.having(
@@ -180,6 +201,7 @@ export class TransactionsService {
 
     const items = results.map((r) => ({
       client: r.client,
+      customerId: r.customerId,
       branch: r.branch || 'N/A',
       panel: r.panel || 'N/A',
       website: r.website || 'N/A',
@@ -202,6 +224,31 @@ export class TransactionsService {
   }
 
   async getClientTransactions(client: string) {
+    // Resolve customerId by joining Website and Customer on existing transactions
+    const customerRow = await this.transactionsRepository
+      .createQueryBuilder('transaction')
+      .leftJoin(
+        Website,
+        'website_entity',
+        'LOWER(website_entity.url) = LOWER(transaction.website) OR LOWER(website_entity.name) = LOWER(transaction.website)',
+      )
+      .leftJoin(
+        Customer,
+        'customer',
+        'customer.externalId = transaction.client AND customer.websiteId = website_entity.id',
+      )
+      .leftJoin(Tag, 'tag', 'customer.tagId = tag.id')
+      .where('transaction.client = :client', { client })
+      .select('customer.id', 'customerId')
+      .addSelect('tag.name', 'tagName')
+      .addSelect('tag.color', 'tagColor')
+      .limit(1)
+      .getRawOne<{
+        customerId?: string;
+        tagName?: string;
+        tagColor?: string;
+      }>();
+
     const deposits = await this.transactionsRepository.find({
       where: {
         client,
@@ -229,6 +276,11 @@ export class TransactionsService {
 
     return {
       client,
+      customerId: customerRow?.customerId || null,
+      tag:
+        customerRow?.tagName && customerRow?.tagColor
+          ? { name: customerRow.tagName, color: customerRow.tagColor }
+          : null,
       branch,
       website,
       deposits,

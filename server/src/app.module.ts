@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { User } from './users/entities/user.entity';
 import { Website } from './websites/entities/website.entity';
 import { Customer } from './customers/entities/customer.entity';
+import { Tag } from './customers/entities/tags.entity';
 import { UsersModule } from './users/users.module';
 import { WebsitesModule } from './websites/websites.module';
 import { AuthModule } from './auth/auth.module';
@@ -29,9 +30,9 @@ import { TransactionsModule } from './transactions/transactions.module';
       database: 'crm_db',
       autoLoadEntities: true,
       synchronize: true, // Only for dev
-      entities: [User, Website, Customer],
+      entities: [User, Website, Customer, Tag],
     }),
-    TypeOrmModule.forFeature([User, Website, Customer]),
+    TypeOrmModule.forFeature([User, Website, Customer, Tag]),
     UsersModule,
     WebsitesModule,
     AuthModule,

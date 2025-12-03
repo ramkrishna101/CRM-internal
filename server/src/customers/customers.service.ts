@@ -4,13 +4,20 @@ import { ILike, Repository } from 'typeorm';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { Customer, CustomerStatus } from './entities/customer.entity';
+import { Tag } from './entities/tags.entity';
 
 @Injectable()
 export class CustomersService {
   constructor(
     @InjectRepository(Customer)
     private customersRepository: Repository<Customer>,
+    @InjectRepository(Tag)
+    private tagsRepository: Repository<Tag>,
   ) {}
+
+  async getTags() {
+    return this.tagsRepository.find();
+  }
 
   create(createCustomerDto: CreateCustomerDto) {
     const customer = this.customersRepository.create(createCustomerDto);
@@ -186,7 +193,19 @@ export class CustomersService {
   }
 
   update(id: string, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`;
+    const fieldsToUpdate: Partial<Customer> = {};
+    if (typeof updateCustomerDto.tagId !== 'undefined') {
+      fieldsToUpdate.tagId = updateCustomerDto.tagId as string | undefined;
+    }
+    // Extend here for other updatable fields when needed
+    return this.customersRepository
+      .createQueryBuilder()
+      .update(Customer)
+      .set(fieldsToUpdate)
+      .where('id = :id', { id })
+      .returning('*')
+      .execute()
+      .then(async () => this.findOne(id));
   }
 
   remove(id: string) {

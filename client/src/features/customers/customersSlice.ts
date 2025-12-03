@@ -6,6 +6,8 @@ export interface Customer {
     websiteId: string;
     externalId: string;
     username: string;
+    tagId?: string | null;
+    tag?: Tag | null;
     email: string;
     phone: string;
     totalDeposits: number;
@@ -33,6 +35,13 @@ interface CustomersState {
         websites: string[];
         branches: string[];
     };
+    tags: Tag[];
+}
+
+export interface Tag {
+    id: string;
+    name: string;
+    color: string;
 }
 
 const initialState: CustomersState = {
@@ -43,6 +52,7 @@ const initialState: CustomersState = {
         websites: [],
         branches: [],
     },
+    tags: [],
 };
 
 export const fetchCustomerOptions = createAsyncThunk(
@@ -98,6 +108,30 @@ export const fetchCustomerById = createAsyncThunk(
     }
 );
 
+export const fetchCustomerTags = createAsyncThunk(
+    'customers/fetchTags',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await api.get('/customers/tags');
+            return response.data as Tag[];
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to fetch tags');
+        }
+    }
+);
+
+export const updateCustomerTag = createAsyncThunk(
+    'customers/updateTag',
+    async ({ id, tagId }: { id: string; tagId: string | null }, { rejectWithValue }) => {
+        try {
+            const response = await api.patch(`/customers/${id}`, { tagId });
+            return response.data as Customer;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to update tag');
+        }
+    }
+);
+
 const customersSlice = createSlice({
     name: 'customers',
     initialState,
@@ -135,6 +169,15 @@ const customersSlice = createSlice({
             })
             .addCase(fetchCustomerOptions.fulfilled, (state, action) => {
                 state.options = action.payload;
+            })
+            .addCase(fetchCustomerTags.fulfilled, (state, action) => {
+                state.tags = action.payload;
+            })
+            .addCase(updateCustomerTag.fulfilled, (state, action) => {
+                const idx = state.items.findIndex(c => c.id === action.payload.id);
+                if (idx !== -1) {
+                    state.items[idx] = action.payload;
+                }
             });
     },
 });
