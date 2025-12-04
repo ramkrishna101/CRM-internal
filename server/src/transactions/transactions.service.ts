@@ -135,7 +135,7 @@ export class TransactionsService {
         Customer,
         'customer',
         'customer.externalId = transaction.client AND customer.websiteId = website_entity.id',
-      );
+      ).andWhere('customer.id is not null');
 
       if (search) {
         qb.andWhere(

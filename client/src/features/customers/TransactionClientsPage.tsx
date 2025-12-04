@@ -55,6 +55,8 @@ const TransactionClientsPage = () => {
   // Check if user is admin
   const isAdmin =
     currentUser?.role === 'admin' || currentUser?.role === 'ADMIN';
+  const isAgent =
+    currentUser?.role === 'agent' || currentUser?.role === 'AGENT';
 
   // Get user's website name (we'll need to fetch it or get from token)
   const [userWebsiteName, setUserWebsiteName] = useState<string | null>(
@@ -126,6 +128,13 @@ const TransactionClientsPage = () => {
   const hasLoadedOptions = useRef(false);
   const hasInitializedWebsite = useRef(false);
   const lastPanelsWebsite = useRef<string | null>(null);
+  // subsection collapses (default collapsed)
+  const [portalOpen, setPortalOpen] = useState(false);
+  const [interactionsOpen, setInteractionsOpen] = useState(false);
+  const [transactionsOpen, setTransactionsOpen] = useState(false);
+  const [depositsOpen, setDepositsOpen] = useState(false);
+  const [withdrawalsOpen, setWithdrawalsOpen] = useState(false);
+  const [miscOpen, setMiscOpen] = useState(false);
 
   /* ---------------------- Load user's website name ----------------------- */
   useEffect(() => {
@@ -523,339 +532,489 @@ const TransactionClientsPage = () => {
               </Grid>
               
               <Grid size={{ xs: 12 }}>
-                <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1, mt: 0.5, mb: 0.5 }}>
-                  Portal
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  select
-                  label="Website"
-                  fullWidth
-                  value={website}
-                  onChange={handleWebsiteChange}
-                  size="small"
-                  disabled={!isAdmin && userWebsiteName !== null}
-                  helperText={
-                    !isAdmin && userWebsiteName
-                      ? 'Restricted to your assigned website'
-                      : ''
-                  }
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mt: 0.5, mb: 0.5, cursor: 'pointer' }}
+                  onClick={() => setPortalOpen(v => !v)}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  {options.websites.map(option => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  select
-                  label="Branch"
-                  fullWidth
-                  value={branch}
-                  onChange={handleBranchChange}
-                  size="small"
-                >
-                  <MenuItem value="">All</MenuItem>
-                  {options.branches.map(option => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  select
-                  label="Panel"
-                  fullWidth
-                  value={panel}
-                  onChange={handlePanelChange}
-                  size="small"
-                  disabled={
-                    !isAdmin &&
-                    currentUser?.panels &&
-                    currentUser.panels.length > 0
-                  }
-                  helperText={
-                    !isAdmin &&
-                    currentUser?.panels &&
-                    currentUser.panels.length > 0
-                      ? 'Restricted to your assigned panels'
-                      : ''
-                  }
-                >
-                  <MenuItem value="">All</MenuItem>
-                  {options.panels.map(option => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                  <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1 }}>
+                    Portal
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setPortalOpen(v => !v);
+                    }}
+                  >
+                    {portalOpen ? <ExpandLess /> : <ExpandMore />}
+                  </IconButton>
+                </Box>
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1, mt: 0.5, mb: 0.5 }}>
-                  Interactions
-                </Typography>
+                <Collapse in={portalOpen} unmountOnExit>
+                  <Grid container spacing={1}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        select
+                        label="Website"
+                        fullWidth
+                        value={website}
+                        onChange={handleWebsiteChange}
+                        size="small"
+                        disabled={
+                          (!isAdmin && userWebsiteName !== null) ||
+                          (!isAdmin &&
+                            userWebsiteName === null &&
+                            currentUser?.panels &&
+                            currentUser.panels.length > 0)
+                        }
+                        helperText={
+                          !isAdmin && userWebsiteName
+                            ? 'Restricted to your assigned website'
+                            : (!isAdmin &&
+                              userWebsiteName === null &&
+                              currentUser?.panels &&
+                              currentUser.panels.length > 0
+                                ? 'No website assigned; restricted to your assigned panels'
+                                : '')
+                        }
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {options.websites.map(option => (
+                          <MenuItem key={option} value={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        select
+                        label="Branch"
+                        fullWidth
+                        value={branch}
+                        onChange={handleBranchChange}
+                        size="small"
+                        disabled={isAgent}
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {options.branches.map(option => (
+                          <MenuItem key={option} value={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        select
+                        label="Panel"
+                        fullWidth
+                        value={panel}
+                        onChange={handlePanelChange}
+                        size="small"
+                        disabled={
+                          !isAdmin &&
+                          currentUser?.panels &&
+                          currentUser.panels.length > 0
+                        }
+                        helperText={
+                          !isAdmin &&
+                          currentUser?.panels &&
+                          currentUser.panels.length > 0
+                            ? 'Restricted to your assigned panels'
+                            : ''
+                        }
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {options.panels.map(option => (
+                          <MenuItem key={option} value={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                  </Grid>
+                </Collapse>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="Last Call Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={lastCallDate}
-                  onChange={handleLastCallDateChange}
-                  onFocus={() => {
-                    if (!lastCallDate) {
-                      const d = new Date();
-                      const yyyy = d.getFullYear();
-                      const mm = String(d.getMonth() + 1).padStart(2, '0');
-                      const dd = String(d.getDate()).padStart(2, '0');
-                      const today = `${yyyy}-${mm}-${dd}`;
-                      setLastCallDate(today);
-                    }
-                  }}
-                  size="small"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  select
-                  label="Last Call Outcome"
-                  fullWidth
-                  value={lastCallOutcome}
-                  onChange={handleLastCallOutcomeChange}
-                  size="small"
+              <Grid size={{ xs: 12 }}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mt: 0.5, mb: 0.5, cursor: 'pointer' }}
+                  onClick={() => setInteractionsOpen(v => !v)}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="ringing">Ringing</MenuItem>
-                  <MenuItem value="didnt_pick">Didn't Pick</MenuItem>
-                  <MenuItem value="interested">Interested</MenuItem>
-                  <MenuItem value="not_interested">Not Interested</MenuItem>
-                </TextField>
+                  <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1 }}>
+                    Interactions
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setInteractionsOpen(v => !v);
+                    }}
+                  >
+                    {interactionsOpen ? <ExpandLess /> : <ExpandMore />}
+                  </IconButton>
+                </Box>
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1, mt: 0.5, mb: 0.5 }}>
-                  Transactions
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="First Transaction Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={firstTransactionDate}
-                  onChange={handleFirstTransactionDateChange}
-                  onFocus={() => {
-                    if (!firstTransactionDate) {
-                      const d = new Date();
-                      const yyyy = d.getFullYear();
-                      const mm = String(d.getMonth() + 1).padStart(2, '0');
-                      const dd = String(d.getDate()).padStart(2, '0');
-                      const today = `${yyyy}-${mm}-${dd}`;
-                      setFirstTransactionDate(today);
-                    }
-                  }}
-                  size="small"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="Last Transaction Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={lastTransactionDate}
-                  onChange={handleLastTransactionDateChange}
-                  onFocus={() => {
-                    if (!lastTransactionDate) {
-                      const d = new Date();
-                      const yyyy = d.getFullYear();
-                      const mm = String(d.getMonth() + 1).padStart(2, '0');
-                      const dd = String(d.getDate()).padStart(2, '0');
-                      const today = `${yyyy}-${mm}-${dd}`;
-                      setLastTransactionDate(today);
-                    }
-                  }}
-                  size="small"
-                />
+                <Collapse in={interactionsOpen} unmountOnExit>
+                  <Grid container spacing={1}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="Last Call Date"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        value={lastCallDate}
+                        onChange={handleLastCallDateChange}
+                        onFocus={() => {
+                          if (!lastCallDate) {
+                            const d = new Date();
+                            const yyyy = d.getFullYear();
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const today = `${yyyy}-${mm}-${dd}`;
+                            setLastCallDate(today);
+                          }
+                        }}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        select
+                        label="Last Call Outcome"
+                        fullWidth
+                        value={lastCallOutcome}
+                        onChange={handleLastCallOutcomeChange}
+                        size="small"
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        <MenuItem value="ringing">Ringing</MenuItem>
+                        <MenuItem value="didnt_pick">Didn't Pick</MenuItem>
+                        <MenuItem value="interested">Interested</MenuItem>
+                        <MenuItem value="not_interested">Not Interested</MenuItem>
+                      </TextField>
+                    </Grid>
+                  </Grid>
+                </Collapse>
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1, mt: 0.5, mb: 0.5 }}>
-                  Deposits
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="First Deposit Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={firstDepositDate}
-                  onChange={handleFirstDepositDateChange}
-                  onFocus={() => {
-                    if (!firstDepositDate) {
-                      const d = new Date();
-                      const yyyy = d.getFullYear();
-                      const mm = String(d.getMonth() + 1).padStart(2, '0');
-                      const dd = String(d.getDate()).padStart(2, '0');
-                      const today = `${yyyy}-${mm}-${dd}`;
-                      setFirstDepositDate(today);
-                    }
-                  }}
-                  size="small"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="Last Deposit Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={lastDepositDate}
-                  onChange={handleLastDepositDateChange}
-                  onFocus={() => {
-                    if (!lastDepositDate) {
-                      const d = new Date();
-                      const yyyy = d.getFullYear();
-                      const mm = String(d.getMonth() + 1).padStart(2, '0');
-                      const dd = String(d.getDate()).padStart(2, '0');
-                      const today = `${yyyy}-${mm}-${dd}`;
-                      setLastDepositDate(today);
-                    }
-                  }}
-                  size="small"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="Total Deposit Amount Min"
-                  type="number"
-                  fullWidth
-                  value={minTotalDeposits}
-                  onChange={handleMinTotalDepositsChange}
-                  size="small"
-                  inputProps={{ min: 0, step: 1 }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="Total Deposit Amount Max"
-                  type="number"
-                  fullWidth
-                  value={maxTotalDeposits}
-                  onChange={handleMaxTotalDepositsChange}
-                  size="small"
-                  inputProps={{ min: 0, step: 1 }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1, mt: 0.5, mb: 0.5 }}>
-                  Withdrawals
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="First Withdrawal Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={firstWithdrawalDate}
-                  onChange={handleFirstWithdrawalDateChange}
-                  onFocus={() => {
-                    if (!firstWithdrawalDate) {
-                      const d = new Date();
-                      const yyyy = d.getFullYear();
-                      const mm = String(d.getMonth() + 1).padStart(2, '0');
-                      const dd = String(d.getDate()).padStart(2, '0');
-                      const today = `${yyyy}-${mm}-${dd}`;
-                      setFirstWithdrawalDate(today);
-                    }
-                  }}
-                  size="small"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="Last Withdrawal Date"
-                  type="date"
-                  fullWidth
-                  InputLabelProps={{ shrink: true }}
-                  value={lastWithdrawalDate}
-                  onChange={handleLastWithdrawalDateChange}
-                  onFocus={() => {
-                    if (!lastWithdrawalDate) {
-                      const d = new Date();
-                      const yyyy = d.getFullYear();
-                      const mm = String(d.getMonth() + 1).padStart(2, '0');
-                      const dd = String(d.getDate()).padStart(2, '0');
-                      const today = `${yyyy}-${mm}-${dd}`;
-                      setLastWithdrawalDate(today);
-                    }
-                  }}
-                  size="small"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="Total Withdrawal Amount Min"
-                  type="number"
-                  fullWidth
-                  value={minTotalWithdrawals}
-                  onChange={handleMinTotalWithdrawalsChange}
-                  size="small"
-                  inputProps={{ min: 0, step: 1 }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  label="Total Withdrawal Amount Max"
-                  type="number"
-                  fullWidth
-                  value={maxTotalWithdrawals}
-                  onChange={handleMaxTotalWithdrawalsChange}
-                  size="small"
-                  inputProps={{ min: 0, step: 1 }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1, mt: 0.5, mb: 0.5 }}>
-                  Miscellaneous
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  select
-                  label="Status"
-                  fullWidth
-                  value={status}
-                  onChange={handleStatusChange}
-                  size="small"
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mt: 0.5, mb: 0.5, cursor: 'pointer' }}
+                  onClick={() => setTransactionsOpen(v => !v)}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="active">Active</MenuItem>
-                  <MenuItem value="inactive">Inactive</MenuItem>
-                  <MenuItem value="sleeping">Sleeping</MenuItem>
-                </TextField>
+                  <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1 }}>
+                    Transactions
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setTransactionsOpen(v => !v);
+                    }}
+                  >
+                    {transactionsOpen ? <ExpandLess /> : <ExpandMore />}
+                  </IconButton>
+                </Box>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 2 }}>
-                <TextField
-                  select
-                  label="Game Interest"
-                  fullWidth
-                  value={gameInterest}
-                  onChange={handleGameInterestChange}
-                  size="small"
+              <Grid size={{ xs: 12 }}>
+                <Collapse in={transactionsOpen} unmountOnExit>
+                  <Grid container spacing={1}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="First Transaction Date"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        value={firstTransactionDate}
+                        onChange={handleFirstTransactionDateChange}
+                        onFocus={() => {
+                          if (!firstTransactionDate) {
+                            const d = new Date();
+                            const yyyy = d.getFullYear();
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const today = `${yyyy}-${mm}-${dd}`;
+                            setFirstTransactionDate(today);
+                          }
+                        }}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="Last Transaction Date"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        value={lastTransactionDate}
+                        onChange={handleLastTransactionDateChange}
+                        onFocus={() => {
+                          if (!lastTransactionDate) {
+                            const d = new Date();
+                            const yyyy = d.getFullYear();
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const today = `${yyyy}-${mm}-${dd}`;
+                            setLastTransactionDate(today);
+                          }
+                        }}
+                        size="small"
+                      />
+                    </Grid>
+                  </Grid>
+                </Collapse>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mt: 0.5, mb: 0.5, cursor: 'pointer' }}
+                  onClick={() => setDepositsOpen(v => !v)}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="casino">Casino</MenuItem>
-                  <MenuItem value="betting">Betting</MenuItem>
-                </TextField>
+                  <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1 }}>
+                    Deposits
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setDepositsOpen(v => !v);
+                    }}
+                  >
+                    {depositsOpen ? <ExpandLess /> : <ExpandMore />}
+                  </IconButton>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Collapse in={depositsOpen} unmountOnExit>
+                  <Grid container spacing={1}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="First Deposit Date"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        value={firstDepositDate}
+                        onChange={handleFirstDepositDateChange}
+                        onFocus={() => {
+                          if (!firstDepositDate) {
+                            const d = new Date();
+                            const yyyy = d.getFullYear();
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const today = `${yyyy}-${mm}-${dd}`;
+                            setFirstDepositDate(today);
+                          }
+                        }}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="Last Deposit Date"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        value={lastDepositDate}
+                        onChange={handleLastDepositDateChange}
+                        onFocus={() => {
+                          if (!lastDepositDate) {
+                            const d = new Date();
+                            const yyyy = d.getFullYear();
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const today = `${yyyy}-${mm}-${dd}`;
+                            setLastDepositDate(today);
+                          }
+                        }}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="Total Deposit Amount Min"
+                        type="number"
+                        fullWidth
+                        value={minTotalDeposits}
+                        onChange={handleMinTotalDepositsChange}
+                        size="small"
+                        inputProps={{ min: 0, step: 1 }}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="Total Deposit Amount Max"
+                        type="number"
+                        fullWidth
+                        value={maxTotalDeposits}
+                        onChange={handleMaxTotalDepositsChange}
+                        size="small"
+                        inputProps={{ min: 0, step: 1 }}
+                      />
+                    </Grid>
+                  </Grid>
+                </Collapse>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mt: 0.5, mb: 0.5, cursor: 'pointer' }}
+                  onClick={() => setWithdrawalsOpen(v => !v)}
+                >
+                  <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1 }}>
+                    Withdrawals
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setWithdrawalsOpen(v => !v);
+                    }}
+                  >
+                    {withdrawalsOpen ? <ExpandLess /> : <ExpandMore />}
+                  </IconButton>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Collapse in={withdrawalsOpen} unmountOnExit>
+                  <Grid container spacing={1}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="First Withdrawal Date"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        value={firstWithdrawalDate}
+                        onChange={handleFirstWithdrawalDateChange}
+                        onFocus={() => {
+                          if (!firstWithdrawalDate) {
+                            const d = new Date();
+                            const yyyy = d.getFullYear();
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const today = `${yyyy}-${mm}-${dd}`;
+                            setFirstWithdrawalDate(today);
+                          }
+                        }}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="Last Withdrawal Date"
+                        type="date"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        value={lastWithdrawalDate}
+                        onChange={handleLastWithdrawalDateChange}
+                        onFocus={() => {
+                          if (!lastWithdrawalDate) {
+                            const d = new Date();
+                            const yyyy = d.getFullYear();
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            const today = `${yyyy}-${mm}-${dd}`;
+                            setLastWithdrawalDate(today);
+                          }
+                        }}
+                        size="small"
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="Total Withdrawal Amount Min"
+                        type="number"
+                        fullWidth
+                        value={minTotalWithdrawals}
+                        onChange={handleMinTotalWithdrawalsChange}
+                        size="small"
+                        inputProps={{ min: 0, step: 1 }}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        label="Total Withdrawal Amount Max"
+                        type="number"
+                        fullWidth
+                        value={maxTotalWithdrawals}
+                        onChange={handleMaxTotalWithdrawalsChange}
+                        size="small"
+                        inputProps={{ min: 0, step: 1 }}
+                      />
+                    </Grid>
+                  </Grid>
+                </Collapse>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  sx={{ mt: 0.5, mb: 0.5, cursor: 'pointer' }}
+                  onClick={() => setMiscOpen(v => !v)}
+                >
+                  <Typography variant="overline" sx={{ color: 'text.secondary', fontWeight: 700, letterSpacing: 1 }}>
+                    Miscellaneous
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setMiscOpen(v => !v);
+                    }}
+                  >
+                    {miscOpen ? <ExpandLess /> : <ExpandMore />}
+                  </IconButton>
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <Collapse in={miscOpen} unmountOnExit>
+                  <Grid container spacing={1}>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        select
+                        label="Status"
+                        fullWidth
+                        value={status}
+                        onChange={handleStatusChange}
+                        size="small"
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        <MenuItem value="active">Active</MenuItem>
+                        <MenuItem value="inactive">Inactive</MenuItem>
+                        <MenuItem value="sleeping">Sleeping</MenuItem>
+                      </TextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 2 }}>
+                      <TextField
+                        select
+                        label="Game Interest"
+                        fullWidth
+                        value={gameInterest}
+                        onChange={handleGameInterestChange}
+                        size="small"
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        <MenuItem value="casino">Casino</MenuItem>
+                        <MenuItem value="betting">Betting</MenuItem>
+                      </TextField>
+                    </Grid>
+                  </Grid>
+                </Collapse>
               </Grid>
               <Grid size={{ xs: 12 }}>
                 <Box display="flex" justifyContent="flex-end" gap={1}>
